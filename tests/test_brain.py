@@ -67,3 +67,14 @@ def test_tokenization_is_reproducible_and_exportable(tmp_path):
     other = LexicalMemory(tmp_path / "import.sqlite3")
     assert other.import_json(exported)["concepts"] == 1
     other.close(); memory.close()
+
+def test_human_teaching_loop_for_unknown_word(tmp_path):
+    memory = LexicalMemory(tmp_path / "lesson.sqlite3")
+    brain = Brain(memory, ROOT / "neurons" / "default.yml")
+    question = brain.process("hola, quiero hablar sobre zumbalú")
+    assert "¿Qué significa" in question["response"]
+    taught = brain.process("zumbalú significa una idea inventada para probar el aprendizaje")
+    assert "Gracias por enseñarme" in taught["response"]
+    learned = brain.process("¿qué es zumbalú?")
+    assert "idea inventada" in learned["response"]
+    memory.close()

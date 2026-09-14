@@ -9,6 +9,7 @@ from .vectors import cosine, vector_for, tokenize, tokenize_ids, numeric_text
 
 EMOTION_WORDS={"alegria":{"feliz","alegría","gracias","amor","excelente","bien"},"tristeza":{"triste","dolor","pérdida","solo","llorar"},"enojo":{"odio","enojo","rabia","molesto","injusto"},"curiosidad":{"cómo","como","porqué","por","qué","que","aprender","entender"}}
 CODE_MARKERS={"python","código","codigo","programa","función","funcion","error","bug","script","clase","variable"}
+STOPWORDS={"a","al","con","cómo","como","de","del","el","en","es","esta","está","este","la","las","lo","los","me","mi","para","por","qué","que","se","su","un","una","y","yo","hola","buenas","saludos","estás","estas","hablar","quiero","sobre"}
 
 class Brain:
     def __init__(self,memory:LexicalMemory,neuron_file:str|Path):
@@ -31,6 +32,19 @@ class Brain:
     def _confidence(self,text,memories):
         exact=len(self.memory.search_tokens(text)); best=max((score for score,_ in memories),default=0.0)
         return min(1.0,.55*min(1,exact)+.45*max(0,best))
+
+    def _unknown_terms(self, text):
+        known={row["term"] for row in self.memory.all()}
+        candidates=[token for token in tokenize(text) if token.isalpha() and token not in STOPWORDS and len(token)>2]
+        return [token for token in candidates if token not in known][:2]
+
+    def _learn_from_definition(self, text):
+        match=re.search(r"^\s*([\wáéíóúüñ ]{2,40})\s+(?:significa|es)\s+(.{4,})[.!]?\s*$", text, re.IGNORECASE)
+        if not match:return None
+        term=match.group(1).strip().casefold(); meaning=match.group(2).strip()
+        if " " in term: term=term.split()[-1]
+        self.memory.add(term, category="enseñanza_usuario", teaching=meaning, examples=[text])
+        return term,meaning
 
     def generate(self,text,emotion,memories,confidence):
         tokens=set(tokenize(text))
@@ -64,7 +78,16 @@ class Brain:
         text=text.strip()
         if not text:
             return {"input":"","response":"Estoy escuchando. Escribe una pregunta, idea o ejemplo.","emotion":"neutralidad","emotion_confidence":1.0,"knowledge_confidence":0.0,"numeric_spelling":[],"user_vector":[],"memories":[]}
-        emotion,emotion_conf=self.estimate_emotion(text); memories=self.retrieve(text); confidence=self._confidence(text,memories); response=self.generate(text,emotion,memories,confidence)
+        learned=self._learn_from_definition(text)
+        if learned:
+            term,meaning=learned; response=f"Gracias por enseñarme que «{term}» significa «{meaning}». Lo guardaré en mi memoria para relacionarlo con futuras conversaciones. ¿Qué otra palabra o concepto te gustaría enseñarme?"; emotion,emotion_conf="curiosidad",.8; memories=[]; confidence=1.0
+        else:
+            emotion,emotion_conf=self.estimate_emotion(text); memories=self.retrieve(text); confidence=self._confidence(text,memories)
+            unknown=self._unknown_terms(text)
+            response=self.generate(text,emotion,memories,confidence)
+            protected = "```" in text or any(marker in text for marker in ("def ", "class ", "import ", "from ", "return ", "E =", "E="))
+            if unknown and confidence < self.min_confidence and not protected:
+                response=f"Quiero entenderte mejor. ¿Qué significa «{unknown[0]}»? Puedes responder, por ejemplo: «{unknown[0]} significa ...»."
         self.history.append({"user":text,"assistant":response})
         self.history=self.history[-12:]
         self.memory.record_interaction(text,response,emotion,confidence)
