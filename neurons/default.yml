@@ -1,0 +1,22 @@
+brain:
+  dimensions: 64
+  top_k: 5
+  learning_rate: 0.08
+neurons:
+  - id: lexical_encoder
+    type: encoder
+    activation: tanh
+  - id: context_retriever
+    type: retriever
+    activation: softmax
+    top_k: 5
+  - id: emotion_estimator
+    type: emotion
+    activation: tanh
+  - id: response_generator
+    type: generator
+    activation: weighted_pattern
+connections:
+  - [lexical_encoder, context_retriever]
+  - [context_retriever, emotion_estimator]
+  - [context_retriever, response_generator]
