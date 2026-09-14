@@ -103,3 +103,20 @@ PYTHONPATH=src python -m neural_dictionary_ai.cli \
 ```
 
 El entrenamiento actual añade conceptos de comunicación, lenguaje, computación, programación, matemáticas, ciencia, seguridad e inteligencia artificial, además de relaciones como `palabra tiene significado`, `contexto aclara significado` y `entrenamiento mejora inferencia`. El reporte contiene rondas, conceptos, cobertura y confianza media para poder inspeccionar el progreso.
+
+## Enseñanza durante la conversación
+
+Cuando aparece un término relevante que no está en SQLite, el sistema pregunta de forma conversacional:
+
+```text
+ia> Quiero entenderte mejor. ¿Qué significa «zumbalú»? Puedes responder, por ejemplo: «zumbalú significa ...».
+```
+
+Si el usuario responde con una definición, el sistema la guarda como conocimiento aprendido:
+
+```text
+tú> zumbalú significa una idea inventada para probar el aprendizaje
+ia> Gracias por enseñarme que «zumbalú» significa «una idea inventada para probar el aprendizaje». Lo guardaré en mi memoria para relacionarlo con futuras conversaciones. ¿Qué otra palabra o concepto te gustaría enseñarme?
+```
+
+Las expresiones comunes como `hola`, `gracias`, `adiós` y `cómo estás` se tratan como lenguaje conversacional básico, no como términos desconocidos que deban definirse. Este aprendizaje es explícito y verificable: no inventa el significado y solo lo incorpora después de recibir una explicación.

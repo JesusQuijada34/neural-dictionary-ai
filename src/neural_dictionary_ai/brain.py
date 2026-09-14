@@ -9,7 +9,7 @@ from .vectors import cosine, vector_for, tokenize, tokenize_ids, numeric_text
 
 EMOTION_WORDS={"alegria":{"feliz","alegría","gracias","amor","excelente","bien"},"tristeza":{"triste","dolor","pérdida","solo","llorar"},"enojo":{"odio","enojo","rabia","molesto","injusto"},"curiosidad":{"cómo","como","porqué","por","qué","que","aprender","entender"}}
 CODE_MARKERS={"python","código","codigo","programa","función","funcion","error","bug","script","clase","variable"}
-STOPWORDS={"a","al","con","cómo","como","de","del","el","en","es","esta","está","este","la","las","lo","los","me","mi","para","por","qué","que","se","su","un","una","y","yo","hola","buenas","saludos","estás","estas","hablar","quiero","sobre"}
+STOPWORDS={"a","al","con","cómo","como","de","del","el","en","es","esta","está","este","la","las","lo","los","me","mi","para","por","qué","que","se","su","un","una","y","yo","hola","buenas","saludos","estás","estas","hablar","quiero","sobre","gracias","adiós","adios","chao"}
 
 class Brain:
     def __init__(self,memory:LexicalMemory,neuron_file:str|Path):
