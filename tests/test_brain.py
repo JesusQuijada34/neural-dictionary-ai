@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from neural_dictionary_ai.brain import Brain
 from neural_dictionary_ai.memory import LexicalMemory
+from neural_dictionary_ai.vectors import numeric_spelling
 
 ROOT = Path(__file__).parents[1]
 
@@ -12,6 +13,9 @@ def test_memory_and_brain(tmp_path):
     result = brain.process("quiero entender el aprendizaje")
     assert result["response"]
     assert result["emotion"] in {"curiosidad", "neutralidad"}
+    assert result["numeric_spelling"][0] == numeric_spelling("quiero")
+    assert len(result["user_vector"]) == 64
+    assert result["memories"][0]["dictionary_vector"]
     assert json.loads(memory.all()[0]["vector"])
     memory.close()
 

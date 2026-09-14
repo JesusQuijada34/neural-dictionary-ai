@@ -59,3 +59,15 @@ pytest -q
 3. Memoria episódica y evaluación de respuestas.
 4. Aprendizaje supervisado con correcciones del usuario.
 5. Optimización por lotes y, solo si hace falta, módulos nativos controlados.
+
+## Cómo convierte texto en números y vectores
+
+Cada palabra pasa por tres niveles reproducibles:
+
+1. `numeric_spelling("hola")` devuelve los códigos Unicode de sus caracteres, por ejemplo `[104, 111, 108, 97]`.
+2. `vector_for(...)` distribuye esos números en un vector de 64 dimensiones y mezcla una pequeña señal hash para reducir colisiones.
+3. El cerebro calcula la similitud coseno entre el **vector del usuario** y cada **vector del diccionario**. Los conceptos con mayor puntuación alimentan la respuesta.
+
+La salida JSON de `chat` muestra `numeric_spelling`, `user_vector`, los conceptos recuperados y el vector de cada concepto. Esto permite inspeccionar cómo se forma la respuesta en lugar de ocultar el proceso.
+
+Esta es una arquitectura de IA experimental basada en símbolos, memoria y vectores. Para convertirse en un sistema lingüístico más capaz necesitará aprendizaje con grandes corpus legalmente disponibles, objetivos de entrenamiento, evaluación y mecanismos de corrección; agregar palabras por sí solo no crea comprensión general.

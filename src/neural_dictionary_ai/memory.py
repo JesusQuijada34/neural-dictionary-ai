@@ -2,7 +2,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from pathlib import Path
-from .vectors import vector_for, tokenize
+from .vectors import vector_for, numeric_spelling, tokenize
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS concepts (
@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS concepts (
  region TEXT,
  teaching TEXT,
  examples TEXT,
+ numeric_spelling TEXT NOT NULL DEFAULT '[]',
  vector TEXT NOT NULL,
  frequency INTEGER NOT NULL DEFAULT 1,
  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -29,44 +30,42 @@ CREATE TABLE IF NOT EXISTS interactions (
 
 class LexicalMemory:
     def __init__(self, path: str | Path, dimensions: int = 64):
-        self.path = Path(path)
-        self.dimensions = dimensions
+        self.path = Path(path); self.dimensions = dimensions
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.db = sqlite3.connect(self.path)
-        self.db.row_factory = sqlite3.Row
+        self.db = sqlite3.connect(self.path); self.db.row_factory = sqlite3.Row
         self.db.executescript(SCHEMA)
+        self._add_column_if_missing("concepts", "numeric_spelling", "TEXT NOT NULL DEFAULT '[]'")
         self.db.commit()
+
+    def _add_column_if_missing(self, table, column, definition):
+        columns = {row[1] for row in self.db.execute(f"PRAGMA table_info({table})")}
+        if column not in columns: self.db.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
     def add(self, term: str, category='general', region=None, teaching=None, examples=None) -> None:
         term = term.strip().lower()
-        if not term:
-            return
-        self.db.execute("""INSERT INTO concepts(term, category, region, teaching, examples, vector)
-            VALUES (?, ?, ?, ?, ?, ?)
-            ON CONFLICT(term) DO UPDATE SET category=excluded.category,
-            region=excluded.region, teaching=excluded.teaching, examples=excluded.examples,
-            frequency=concepts.frequency+1""", (term, category, region, teaching,
-            json.dumps(examples or [], ensure_ascii=False), json.dumps(vector_for(term, self.dimensions))))
+        if not term: return
+        self.db.execute("""INSERT INTO concepts(term, category, region, teaching, examples, numeric_spelling, vector)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(term) DO UPDATE SET category=excluded.category, region=excluded.region,
+            teaching=excluded.teaching, examples=excluded.examples, numeric_spelling=excluded.numeric_spelling,
+            vector=excluded.vector, frequency=concepts.frequency+1""", (term, category, region, teaching,
+            json.dumps(examples or [], ensure_ascii=False), json.dumps(numeric_spelling(term)),
+            json.dumps(vector_for(term, self.dimensions))))
         self.db.commit()
 
     def bulk_add(self, records) -> int:
-        for record in records:
-            self.add(**record)
+        for record in records: self.add(**record)
         return len(records)
 
-    def all(self):
-        return self.db.execute("SELECT * FROM concepts ORDER BY frequency DESC, term").fetchall()
+    def all(self): return self.db.execute("SELECT * FROM concepts ORDER BY frequency DESC, term").fetchall()
 
     def search_tokens(self, text: str):
         tokens = tokenize(text)
-        if not tokens:
-            return []
+        if not tokens: return []
         placeholders = ','.join('?' for _ in tokens)
         return self.db.execute(f"SELECT * FROM concepts WHERE term IN ({placeholders})", tokens).fetchall()
 
     def record_interaction(self, user_text, response, emotion):
-        self.db.execute("INSERT INTO interactions(user_text,response,emotion) VALUES (?,?,?)", (user_text, response, emotion))
-        self.db.commit()
+        self.db.execute("INSERT INTO interactions(user_text,response,emotion) VALUES (?,?,?)", (user_text, response, emotion)); self.db.commit()
 
-    def close(self):
-        self.db.close()
+    def close(self): self.db.close()

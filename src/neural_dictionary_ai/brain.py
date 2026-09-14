@@ -1,10 +1,9 @@
 from __future__ import annotations
 import json
-import math
 from pathlib import Path
 import yaml
 from .memory import LexicalMemory
-from .vectors import cosine, vector_for, tokenize
+from .vectors import blend_vectors, cosine, vector_for, tokenize, numeric_text
 
 EMOTION_WORDS = {
     "alegria": {"feliz", "alegría", "gracias", "amor", "excelente", "bien"},
@@ -22,40 +21,40 @@ class Brain:
         self.learning_rate = float(self.config["brain"].get("learning_rate", 0.08))
 
     def estimate_emotion(self, text: str) -> tuple[str, float]:
-        tokens = set(tokenize(text))
-        scores = {name: len(tokens & words) for name, words in EMOTION_WORDS.items()}
+        tokens = set(tokenize(text)); scores = {name: len(tokens & words) for name, words in EMOTION_WORDS.items()}
         emotion, score = max(scores.items(), key=lambda item: item[1])
         return (emotion, min(1.0, 0.25 + score * 0.25)) if score else ("neutralidad", 0.2)
 
     def retrieve(self, text: str):
-        query = vector_for(text, self.dimensions)
+        user_vector = vector_for(text, self.dimensions)
         ranked = []
         for row in self.memory.all():
-            try:
-                score = cosine(query, json.loads(row["vector"]))
-            except (TypeError, json.JSONDecodeError):
-                score = 0.0
+            try: dictionary_vector = json.loads(row["vector"])
+            except (TypeError, json.JSONDecodeError): dictionary_vector = vector_for(row["term"], self.dimensions)
+            # La puntuación confronta el vector del usuario con cada vector del diccionario.
+            score = cosine(user_vector, dictionary_vector)
             ranked.append((score, row))
         return sorted(ranked, key=lambda x: x[0], reverse=True)[:self.top_k]
 
     def generate(self, text: str, emotion: str, memories) -> str:
         exact = self.memory.search_tokens(text)
         candidates = [row for row in exact] + [row for _, row in memories]
-        seen = set()
-        candidates = [r for r in candidates if not (r["term"] in seen or seen.add(r["term"]))]
-        if not candidates:
-            return "Todavía no tengo conceptos suficientes; puedo aprender si me das una definición o ejemplo."
+        seen = set(); candidates = [r for r in candidates if not (r["term"] in seen or seen.add(r["term"]))]
+        if not candidates: return "Todavía no tengo conceptos suficientes; puedo aprender si me das una definición o ejemplo."
         terms = ", ".join(r["term"] for r in candidates[:3])
         teachings = [r["teaching"] for r in candidates if r["teaching"]]
-        if teachings:
-            return f"Relaciono tu mensaje con: {terms}. Idea aprendida: {teachings[0]}"
-        return f"Relaciono tu mensaje con: {terms}. Mi estado estimado es {emotion}."
+        if teachings: return f"Relaciono tu vector con: {terms}. Idea aprendida: {teachings[0]}"
+        return f"Relaciono tu vector con: {terms}. Mi estado estimado es {emotion}."
 
     def process(self, text: str) -> dict:
         emotion, confidence = self.estimate_emotion(text)
+        user_vector = vector_for(text, self.dimensions)
         memories = self.retrieve(text)
         response = self.generate(text, emotion, memories)
         self.memory.record_interaction(text, response, emotion)
-        return {"input": text, "response": response, "emotion": emotion,
-                "confidence": round(confidence, 3),
-                "memories": [{"term": row["term"], "score": round(score, 4)} for score, row in memories]}
+        return {"input": text, "response": response, "emotion": emotion, "confidence": round(confidence, 3),
+                "numeric_spelling": numeric_text(text),
+                "user_vector": [round(x, 5) for x in user_vector],
+                "memories": [{"term": row["term"], "score": round(score, 4),
+                              "dictionary_vector": [round(x, 4) for x in json.loads(row["vector"])]}
+                             for score, row in memories]}
