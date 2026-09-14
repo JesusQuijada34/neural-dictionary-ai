@@ -36,7 +36,7 @@ def singular_plural(word: str) -> dict:
 
 def sentence_template(intent: str, language="es") -> str:
     templates={
-        "es":{"greeting":"Hola, ¿cómo estás? ¿En qué puedo ayudarte hoy?","unknown":"¿Qué significa «{term}»?","teach":"Gracias por enseñarme que «{term}» significa «{meaning}»."},
+        "es":{"greeting":"Hola, ¿cómo estás? Estoy aquí y listo para conversar contigo. ¿En qué puedo ayudarte hoy? ¿Cómo te encuentras tú?","unknown":"¿Qué significa «{term}»?","teach":"Gracias por enseñarme que «{term}» significa «{meaning}»."},
         "en":{"greeting":"Hello, how are you? How can I help you today?","unknown":"What does «{term}» mean?","teach":"Thank you for teaching me that «{term}» means «{meaning}»."},
         "pt":{"greeting":"Olá, como você está? Como posso ajudar hoje?","unknown":"O que significa «{term}»?","teach":"Obrigado por me ensinar que «{term}» significa «{meaning}»."},
     }
