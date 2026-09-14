@@ -71,3 +71,23 @@ Cada palabra pasa por tres niveles reproducibles:
 La salida JSON de `chat` muestra `numeric_spelling`, `user_vector`, los conceptos recuperados y el vector de cada concepto. Esto permite inspeccionar cómo se forma la respuesta en lugar de ocultar el proceso.
 
 Esta es una arquitectura de IA experimental basada en símbolos, memoria y vectores. Para convertirse en un sistema lingüístico más capaz necesitará aprendizaje con grandes corpus legalmente disponibles, objetivos de entrenamiento, evaluación y mecanismos de corrección; agregar palabras por sí solo no crea comprensión general.
+
+## Conversación interactiva
+
+El comando `chat` sin texto abre una sesión continua. Reconoce saludos como `hola`, `hola cómo estás`, despedidas y turnos sucesivos. El objeto `Brain` conserva hasta 12 turnos en memoria de sesión y registra las interacciones en SQLite, por lo que puede mantener continuidad básica durante la conversación.
+
+```bash
+PYTHONPATH=src python -m neural_dictionary_ai.cli --db data/dictionary.sqlite3 seed
+PYTHONPATH=src python -m neural_dictionary_ai.cli --db data/dictionary.sqlite3 chat
+```
+
+Ejemplo:
+
+```text
+tú> hola cómo estás
+ia> Hola. Estoy aquí y listo para conversar contigo. No siento como una persona, pero puedo analizar tu mensaje, recordar el contexto de esta sesión y responder de forma coherente. ¿Cómo te encuentras tú?
+tú> quiero aprender Python
+ia> ...
+```
+
+El texto se transforma internamente a códigos numéricos y vectores antes de buscar significado. Eso no significa que se convierta directamente a lenguaje máquina: Python es interpretado o compilado por el entorno y el procesador ejecuta instrucciones de bajo nivel. El proyecto busca el comportamiento de un sistema conversacional local, no pretende afirmar consciencia, sentimientos reales ni equivalencia con un modelo grande de Hugging Face.

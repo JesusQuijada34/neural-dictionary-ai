@@ -34,3 +34,14 @@ def test_code_is_analyzed_without_execution(tmp_path):
     assert result["response"]
     assert "estática" in result["response"]
     memory.close()
+
+def test_interactive_greeting_and_session_context(tmp_path):
+    memory = LexicalMemory(tmp_path / "chat.sqlite3")
+    brain = Brain(memory, ROOT / "neurons" / "default.yml")
+    first = brain.process("hola cómo estás")
+    second = brain.process("gracias")
+    assert "¿Cómo te encuentras tú?" in first["response"]
+    assert first["turn"] == 1
+    assert second["turn"] == 2
+    assert len(brain.history) == 2
+    memory.close()

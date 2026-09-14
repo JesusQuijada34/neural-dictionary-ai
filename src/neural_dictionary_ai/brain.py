@@ -13,6 +13,7 @@ class Brain:
     def __init__(self,memory:LexicalMemory,neuron_file:str|Path):
         self.memory=memory; self.config=yaml.safe_load(Path(neuron_file).read_text(encoding="utf-8")); cfg=self.config["brain"]
         self.dimensions=int(cfg.get("dimensions",64)); self.top_k=int(cfg.get("top_k",5)); self.min_confidence=float(cfg.get("min_confidence",0.28)); self.code=CodeExpert()
+        self.history=[]
 
     def estimate_emotion(self,text):
         tokens=set(tokenize(text)); scores={name:len(tokens&words) for name,words in EMOTION_WORDS.items()}; emotion,score=max(scores.items(),key=lambda x:x[1])
@@ -32,6 +33,13 @@ class Brain:
 
     def generate(self,text,emotion,memories,confidence):
         tokens=set(tokenize(text))
+        greetings={"hola","buenas","saludos","hey","buenos"}
+        if tokens & greetings:
+            if {"cómo","como","estás","estas"} & tokens:
+                return "Hola. Estoy aquí y listo para conversar contigo. No siento como una persona, pero puedo analizar tu mensaje, recordar el contexto de esta sesión y responder de forma coherente. ¿Cómo te encuentras tú?"
+            return "Hola. Me alegra conversar contigo. ¿Qué te gustaría aprender o construir hoy?"
+        if tokens & {"adiós","adios","chao","gracias"}:
+            return "Ha sido un gusto conversar contigo. Cuando quieras, podemos continuar aprendiendo."
         code_request = tokens & {"código", "codigo", "revisa", "depura", "debug", "error", "bug"}
         code_syntax = "```" in text or any(marker in text for marker in ("def ", "class ", "import ", "from ", "return ", "():"))
         if "python" in tokens and (code_request or code_syntax) or code_syntax:
@@ -48,6 +56,11 @@ class Brain:
         return f"{tone} Relaciono tu mensaje con {terms}.{relation_text} {teachings[0] if teachings else 'Puedo seguir aprendiendo con ejemplos.'}"
 
     def process(self,text):
+        text=text.strip()
+        if not text:
+            return {"input":"","response":"Estoy escuchando. Escribe una pregunta, idea o ejemplo.","emotion":"neutralidad","emotion_confidence":1.0,"knowledge_confidence":0.0,"numeric_spelling":[],"user_vector":[],"memories":[]}
         emotion,emotion_conf=self.estimate_emotion(text); memories=self.retrieve(text); confidence=self._confidence(text,memories); response=self.generate(text,emotion,memories,confidence)
+        self.history.append({"user":text,"assistant":response})
+        self.history=self.history[-12:]
         self.memory.record_interaction(text,response,emotion,confidence)
-        return {"input":text,"response":response,"emotion":emotion,"emotion_confidence":round(emotion_conf,3),"knowledge_confidence":round(confidence,3),"numeric_spelling":numeric_text(text),"user_vector":[round(x,5) for x in vector_for(text,self.dimensions)],"memories":[{"term":r["term"],"score":round(s,4),"meaning":r["teaching"]} for s,r in memories]}
+        return {"input":text,"response":response,"emotion":emotion,"emotion_confidence":round(emotion_conf,3),"knowledge_confidence":round(confidence,3),"turn":len(self.history),"numeric_spelling":numeric_text(text),"user_vector":[round(x,5) for x in vector_for(text,self.dimensions)],"memories":[{"term":r["term"],"score":round(s,4),"meaning":r["teaching"]} for s,r in memories]}
