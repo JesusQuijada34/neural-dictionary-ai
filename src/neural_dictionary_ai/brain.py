@@ -32,7 +32,9 @@ class Brain:
 
     def generate(self,text,emotion,memories,confidence):
         tokens=set(tokenize(text))
-        if tokens & CODE_MARKERS or "```" in text:
+        code_request = tokens & {"código", "codigo", "revisa", "depura", "debug", "error", "bug"}
+        code_syntax = "```" in text or any(marker in text for marker in ("def ", "class ", "import ", "from ", "return ", "():"))
+        if "python" in tokens and (code_request or code_syntax) or code_syntax:
             analysis=self.code.analyze(text); status="válido" if analysis["valid"] else "con errores"
             detail="; ".join(analysis["issues"] or analysis["advice"])
             return f"He revisado el código de forma estática: {status}. {detail} No lo ejecuté por seguridad."

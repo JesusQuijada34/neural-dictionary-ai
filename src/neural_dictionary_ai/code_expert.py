@@ -23,4 +23,7 @@ class CodeExpert:
         if "```" in text:
             parts = text.split("```")
             return parts[1].removeprefix("python").strip() if len(parts)>1 else text
+        starts = [text.find(marker) for marker in ("def ", "class ", "import ", "from ") if text.find(marker) >= 0]
+        if starts:
+            return text[min(starts):].strip()
         return text
