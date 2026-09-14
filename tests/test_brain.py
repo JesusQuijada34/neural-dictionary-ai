@@ -15,7 +15,8 @@ def test_memory_and_brain(tmp_path):
     assert result["emotion"] in {"curiosidad", "neutralidad"}
     assert result["numeric_spelling"][0] == numeric_spelling("quiero")
     assert len(result["user_vector"]) == 64
-    assert result["memories"][0]["dictionary_vector"]
+    assert result["memories"][0]["meaning"]
+    assert 0 <= result["knowledge_confidence"] <= 1
     assert json.loads(memory.all()[0]["vector"])
     memory.close()
 
@@ -25,3 +26,11 @@ def test_persistence(tmp_path):
     second = LexicalMemory(path)
     assert second.all()[0]["term"] == "memoria"
     second.close()
+
+def test_code_is_analyzed_without_execution(tmp_path):
+    memory = LexicalMemory(tmp_path / "code.sqlite3")
+    brain = Brain(memory, ROOT / "neurons" / "default.yml")
+    result = brain.process("revisa este código: def suma(a, b): return a + b")
+    assert result["response"]
+    assert "estática" in result["response"]
+    memory.close()

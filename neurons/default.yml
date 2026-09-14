@@ -1,22 +1,34 @@
 brain:
   dimensions: 64
   top_k: 5
+  min_confidence: 0.28
   learning_rate: 0.08
 neurons:
   - id: lexical_encoder
     type: encoder
     activation: tanh
+  - id: meaning_resolver
+    type: semantic_memory
+    activation: weighted_cosine
   - id: context_retriever
     type: retriever
     activation: softmax
-    top_k: 5
   - id: emotion_estimator
-    type: emotion
+    type: simulated_affect
     activation: tanh
+  - id: code_expert
+    type: static_python_analyzer
+    activation: rules
+  - id: confidence_guard
+    type: fact_strictness
+    activation: threshold
   - id: response_generator
-    type: generator
+    type: human_style_generator
     activation: weighted_pattern
 connections:
-  - [lexical_encoder, context_retriever]
+  - [lexical_encoder, meaning_resolver]
+  - [meaning_resolver, context_retriever]
   - [context_retriever, emotion_estimator]
-  - [context_retriever, response_generator]
+  - [context_retriever, code_expert]
+  - [context_retriever, confidence_guard]
+  - [confidence_guard, response_generator]
