@@ -98,6 +98,7 @@ class Trainer:
             self.memory.add_relation(source, relation, target)
         for row in LEXICAL:
             self.memory.add_lexical(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7])
+            self.memory.add(row[0], category=row[3], teaching=f"Concepto léxico: {row[0]}.")
         return len(KNOWLEDGE)
 
     def evaluate(self) -> dict:
