@@ -3,6 +3,7 @@ from pathlib import Path
 from neural_dictionary_ai.brain import Brain
 from neural_dictionary_ai.memory import LexicalMemory
 from neural_dictionary_ai.vectors import numeric_spelling
+from neural_dictionary_ai.trainer import Trainer
 
 ROOT = Path(__file__).parents[1]
 
@@ -44,4 +45,12 @@ def test_interactive_greeting_and_session_context(tmp_path):
     assert first["turn"] == 1
     assert second["turn"] == 2
     assert len(brain.history) == 2
+    memory.close()
+
+def test_trainer_reports_progress(tmp_path):
+    memory = LexicalMemory(tmp_path / "train.sqlite3")
+    brain = Brain(memory, ROOT / "neurons" / "default.yml")
+    report = Trainer(memory, brain).train(rounds=3)
+    assert report["rounds_completed"] == 3
+    assert report["final"]["concept_count"] >= 30
     memory.close()

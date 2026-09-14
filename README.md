@@ -91,3 +91,15 @@ ia> ...
 ```
 
 El texto se transforma internamente a códigos numéricos y vectores antes de buscar significado. Eso no significa que se convierta directamente a lenguaje máquina: Python es interpretado o compilado por el entorno y el procesador ejecuta instrucciones de bajo nivel. El proyecto busca el comportamiento de un sistema conversacional local, no pretende afirmar consciencia, sentimientos reales ni equivalencia con un modelo grande de Hugging Face.
+
+## Entrenamiento local verificable
+
+El comando `train` enseña al sistema un conjunto estructurado de conceptos y relaciones, ejecuta preguntas de evaluación y escribe un reporte JSON. No usa un bucle infinito: cada ejecución tiene un máximo de rondas y se detiene antes si la cobertura y la confianza se estabilizan. La estabilidad significa que las métricas del conjunto de pruebas dejan de cambiar; no significa que el sistema conozca todo.
+
+```bash
+PYTHONPATH=src python -m neural_dictionary_ai.cli \
+  --db data/dictionary.sqlite3 train --rounds 8 \
+  --report data/training_report.json
+```
+
+El entrenamiento actual añade conceptos de comunicación, lenguaje, computación, programación, matemáticas, ciencia, seguridad e inteligencia artificial, además de relaciones como `palabra tiene significado`, `contexto aclara significado` y `entrenamiento mejora inferencia`. El reporte contiene rondas, conceptos, cobertura y confianza media para poder inspeccionar el progreso.

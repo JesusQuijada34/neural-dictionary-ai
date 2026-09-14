@@ -3,4 +3,5 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 data/*.sqlite3
+data/*.json
 *.pyc
