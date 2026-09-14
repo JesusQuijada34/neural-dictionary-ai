@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from neural_dictionary_ai.brain import Brain
 from neural_dictionary_ai.memory import LexicalMemory
-from neural_dictionary_ai.vectors import numeric_spelling
+from neural_dictionary_ai.vectors import numeric_spelling, tokenize, tokenize_ids
 from neural_dictionary_ai.trainer import Trainer
 
 ROOT = Path(__file__).parents[1]
@@ -54,3 +54,16 @@ def test_trainer_reports_progress(tmp_path):
     assert report["rounds_completed"] == 3
     assert report["final"]["concept_count"] >= 30
     memory.close()
+
+def test_tokenization_is_reproducible_and_exportable(tmp_path):
+    assert tokenize("¡Hola, MÉXICO!") == ["¡", "hola", ",", "méxico", "!"]
+    assert tokenize_ids("hola mundo") == tokenize_ids("hola mundo")
+    memory = LexicalMemory(tmp_path / "export.sqlite3")
+    memory.add("concepto", teaching="significado")
+    memory.add_relation("concepto", "tiene", "significado")
+    exported = tmp_path / "knowledge.json"
+    payload = memory.export_json(exported)
+    assert payload["format"] == "neural-dictionary-ai/1"
+    other = LexicalMemory(tmp_path / "import.sqlite3")
+    assert other.import_json(exported)["concepts"] == 1
+    other.close(); memory.close()

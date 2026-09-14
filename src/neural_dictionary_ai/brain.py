@@ -4,7 +4,7 @@ from pathlib import Path
 import yaml
 from .code_expert import CodeExpert
 from .memory import LexicalMemory
-from .vectors import cosine, vector_for, tokenize, numeric_text
+from .vectors import cosine, vector_for, tokenize, tokenize_ids, numeric_text
 
 EMOTION_WORDS={"alegria":{"feliz","alegría","gracias","amor","excelente","bien"},"tristeza":{"triste","dolor","pérdida","solo","llorar"},"enojo":{"odio","enojo","rabia","molesto","injusto"},"curiosidad":{"cómo","como","porqué","por","qué","que","aprender","entender"}}
 CODE_MARKERS={"python","código","codigo","programa","función","funcion","error","bug","script","clase","variable"}
@@ -63,4 +63,4 @@ class Brain:
         self.history.append({"user":text,"assistant":response})
         self.history=self.history[-12:]
         self.memory.record_interaction(text,response,emotion,confidence)
-        return {"input":text,"response":response,"emotion":emotion,"emotion_confidence":round(emotion_conf,3),"knowledge_confidence":round(confidence,3),"turn":len(self.history),"numeric_spelling":numeric_text(text),"user_vector":[round(x,5) for x in vector_for(text,self.dimensions)],"memories":[{"term":r["term"],"score":round(s,4),"meaning":r["teaching"]} for s,r in memories]}
+        return {"input":text,"response":response,"emotion":emotion,"emotion_confidence":round(emotion_conf,3),"knowledge_confidence":round(confidence,3),"turn":len(self.history),"tokens":tokenize(text),"token_ids":tokenize_ids(text),"numeric_spelling":numeric_text(text),"user_vector":[round(x,5) for x in vector_for(text,self.dimensions)],"memories":[{"term":r["term"],"score":round(s,4),"meaning":r["teaching"]} for s,r in memories]}

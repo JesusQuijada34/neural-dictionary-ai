@@ -36,6 +36,23 @@ KNOWLEDGE = [
     ("excepción", "programación", "Situación anómala que puede gestionarse durante la ejecución."),
     ("prueba", "ingeniería", "Comprobación automatizada o manual de un comportamiento esperado."),
 ]
+KNOWLEDGE += [
+    ("energía", "física", "Capacidad de producir cambios o realizar trabajo."), ("materia", "física", "Todo aquello que tiene masa y ocupa un lugar en el espacio."),
+    ("fuerza", "física", "Interacción capaz de modificar el movimiento de un cuerpo."), ("velocidad", "física", "Cambio de posición por unidad de tiempo."),
+    ("célula", "biología", "Unidad básica estructural y funcional de los seres vivos."), ("organismo", "biología", "Ser vivo formado por una o más células."),
+    ("ecosistema", "biología", "Comunidad de seres vivos y su entorno en interacción."), ("agua", "naturaleza", "Sustancia esencial formada por hidrógeno y oxígeno."),
+    ("salud", "vida", "Estado de bienestar físico, mental y social; no es diagnóstico médico."), ("tiempo", "concepto", "Magnitud que ordena cambios y permite describir duración."),
+    ("espacio", "concepto", "Extensión en la que se encuentran objetos y ocurren eventos."), ("causa", "razonamiento", "Hecho o condición que contribuye a producir un efecto."),
+    ("efecto", "razonamiento", "Resultado producido por una causa o conjunto de causas."), ("probabilidad", "matemáticas", "Medida de la posibilidad de que ocurra un evento."),
+    ("promedio", "matemáticas", "Valor obtenido al dividir una suma entre el número de elementos."), ("porcentaje", "matemáticas", "Proporción expresada sobre cien unidades."),
+    ("internet", "tecnología", "Red global de redes que intercambian datos mediante protocolos."), ("web", "tecnología", "Sistema de documentos y recursos enlazados sobre internet."),
+    ("protocolo", "tecnología", "Reglas acordadas para intercambiar o procesar información."), ("servidor", "tecnología", "Sistema que ofrece datos o servicios a otros sistemas."),
+    ("cliente", "tecnología", "Sistema que solicita datos o servicios a un servidor."), ("base de datos", "tecnología", "Colección organizada de datos consultable mediante operaciones definidas."),
+    ("ética", "sociedad", "Reflexión sobre acciones, valores, responsabilidades y consecuencias."), ("decisión", "razonamiento", "Elección entre alternativas según objetivos e información disponible."),
+    ("creatividad", "cognición", "Capacidad de generar combinaciones o ideas nuevas y útiles."), ("atención", "cognición", "Selección de información relevante para procesarla con prioridad."),
+    ("explicación", "comunicación", "Descripción que relaciona hechos y razones para facilitar comprensión."), ("traducción", "lenguaje", "Transformación de un mensaje a otra lengua conservando su intención."),
+    ("idioma", "lenguaje", "Lengua usada por una comunidad para comunicarse."), ("región", "geografía", "Área delimitada por características físicas, culturales o políticas."),
+]
 RELATIONS = [
     ("palabra", "tiene", "significado"), ("pregunta", "inicia", "conversación"),
     ("usuario", "envía", "pregunta"), ("contexto", "aclara", "significado"),
@@ -48,6 +65,8 @@ PROBES = [
     "hola cómo estás", "qué significa una palabra", "quiero aprender sobre vectores",
     "qué es una pregunta", "cómo funciona un bucle en Python", "cómo mejorar la seguridad",
     "qué relación hay entre datos e información", "dame una explicación de contexto",
+    "qué es la energía", "cómo funciona internet", "qué significa una célula",
+    "qué es una probabilidad", "explica causa y efecto",
 ]
 
 class Trainer:

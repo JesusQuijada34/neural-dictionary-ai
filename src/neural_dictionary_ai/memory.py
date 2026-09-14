@@ -69,4 +69,17 @@ class LexicalMemory:
         marks=','.join('?' for _ in tokens); return self.db.execute(f"SELECT * FROM concepts WHERE term IN ({marks})",tokens).fetchall()
     def record_interaction(self,user_text,response,emotion,confidence=0.0):
         self.db.execute("INSERT INTO interactions(user_text,response,emotion,confidence) VALUES(?,?,?,?)",(user_text,response,emotion,confidence)); self.db.commit()
+
+    def export_json(self, path: str | Path):
+        payload={"format":"neural-dictionary-ai/1","concepts":[dict(row) for row in self.all()],"relations":[dict(row) for row in self.db.execute("SELECT source,relation,target,weight FROM relations ORDER BY source,relation,target")]}
+        Path(path).write_text(json.dumps(payload,ensure_ascii=False,indent=2),encoding="utf-8"); return payload
+
+    def import_json(self, path: str | Path) -> dict:
+        payload=json.loads(Path(path).read_text(encoding="utf-8"))
+        for row in payload.get("concepts",[]):
+            examples=row.get("examples",[]); examples=json.loads(examples) if isinstance(examples,str) else examples
+            self.add(row["term"],row.get("category","general"),row.get("region"),row.get("teaching"),examples)
+        for row in payload.get("relations",[]): self.add_relation(row["source"],row["relation"],row["target"],row.get("weight",1.0))
+        return {"concepts":len(payload.get("concepts",[])),"relations":len(payload.get("relations",[]))}
+
     def close(self): self.db.close()
