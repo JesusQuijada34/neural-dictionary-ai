@@ -16,6 +16,11 @@ CREATE TABLE IF NOT EXISTS relations (
  id INTEGER PRIMARY KEY, source TEXT NOT NULL, relation TEXT NOT NULL, target TEXT NOT NULL,
  weight REAL NOT NULL DEFAULT 1.0, UNIQUE(source, relation, target)
 );
+CREATE TABLE IF NOT EXISTS lexical_forms (
+ id INTEGER PRIMARY KEY, term TEXT NOT NULL, language TEXT NOT NULL DEFAULT 'es', lemma TEXT,
+ part_of_speech TEXT, grammatical_number TEXT, synonyms TEXT NOT NULL DEFAULT '[]',
+ antonyms TEXT NOT NULL DEFAULT '[]', translation TEXT, UNIQUE(term, language)
+);
 CREATE TABLE IF NOT EXISTS user_memory (
  id INTEGER PRIMARY KEY, key TEXT NOT NULL UNIQUE, value TEXT NOT NULL, confidence REAL NOT NULL DEFAULT 0.5,
  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -49,6 +54,16 @@ class LexicalMemory:
 
     def add_relation(self, source, relation, target, weight=1.0):
         self.db.execute("INSERT OR REPLACE INTO relations(source,relation,target,weight) VALUES(?,?,?,?)", (source.lower(),relation,target.lower(),weight)); self.db.commit()
+
+    def add_lexical(self, term, language="es", lemma=None, part_of_speech=None, grammatical_number=None, synonyms=None, antonyms=None, translation=None):
+        self.db.execute("""INSERT OR REPLACE INTO lexical_forms(term,language,lemma,part_of_speech,grammatical_number,synonyms,antonyms,translation)
+            VALUES(?,?,?,?,?,?,?,?)""", (term.casefold(),language,lemma or term.casefold(),part_of_speech,grammatical_number,
+            json.dumps(synonyms or [],ensure_ascii=False),json.dumps(antonyms or [],ensure_ascii=False),translation)); self.db.commit()
+
+    def lexical_for(self, term, language=None):
+        query="SELECT * FROM lexical_forms WHERE term=?"; args=[term.casefold()]
+        if language: query += " AND language=?"; args.append(language)
+        return self.db.execute(query,args).fetchall()
 
     def relations_for(self, terms):
         if not terms: return []

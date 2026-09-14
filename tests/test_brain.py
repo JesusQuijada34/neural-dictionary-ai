@@ -78,3 +78,18 @@ def test_human_teaching_loop_for_unknown_word(tmp_path):
     learned = brain.process("¿qué es zumbalú?")
     assert "idea inventada" in learned["response"]
     memory.close()
+
+def test_multilingual_semantic_paths_and_grammar(tmp_path):
+    memory = LexicalMemory(tmp_path / "multi.sqlite3")
+    brain = Brain(memory, ROOT / "neurons" / "default.yml")
+    Trainer(memory, brain).teach_once()
+    result = brain.process("¿Qué significa choza y cómo se relaciona con casa?")
+    assert result["language"] == "es"
+    assert "sinónimos" in result["response"]
+    assert "casa" in result["response"] or "rancho" in result["response"]
+    assert any(path["token"] == "y" and path["role"] == "conector" for path in result["token_paths"])
+    assert any(item["plural"] == "chozas" for item in result["morphology"])
+    english = brain.process("Hello, how are you?")
+    assert english["language"] == "en"
+    assert "Hello" in english["response"]
+    memory.close()

@@ -68,6 +68,24 @@ PROBES = [
     "qué es la energía", "cómo funciona internet", "qué significa una célula",
     "qué es una probabilidad", "explica causa y efecto",
 ]
+LEXICAL = [
+    ("choza", "es", "choza", "sustantivo", "singular", ["casa", "rancho", "cabaña"], ["palacio"], "hut"),
+    ("chozas", "es", "choza", "sustantivo", "plural", ["casas", "ranchos"], ["palacios"], "huts"),
+    ("casa", "es", "casa", "sustantivo", "singular", ["vivienda", "hogar"], ["calle"], "house"),
+    ("house", "en", "house", "noun", "singular", ["home", "dwelling"], ["street"], "casa"),
+    ("casa", "pt", "casa", "substantivo", "singular", ["lar", "moradia"], ["rua"], "house"),
+    ("rancho", "es", "rancho", "sustantivo", "singular", ["granja", "finca"], ["ciudad"], "ranch"),
+    ("y", "es", "y", "conjunción", "invariable", ["e"], ["o"], "and"),
+    ("and", "en", "and", "conjunction", "invariable", ["plus"], ["or"], "y"),
+    ("ser", "es", "ser", "verbo", "infinitivo", ["existir"], ["dejar de existir"], "to be"),
+    ("estar", "es", "estar", "verbo", "infinitivo", ["hallarse"], [], "to be"),
+    ("aprender", "es", "aprender", "verbo", "infinitivo", ["estudiar", "asimilar"], ["olvidar"], "learn"),
+    ("learn", "en", "learn", "verb", "infinitive", ["study", "acquire"], ["forget"], "aprender"),
+    ("hola", "es", "hola", "interjección", "invariable", ["saludos"], ["adiós"], "hello"),
+    ("hello", "en", "hello", "interjection", "invariable", ["hi"], ["goodbye"], "hola"),
+    ("grande", "es", "grande", "adjetivo", "singular", ["enorme", "amplio"], ["pequeño"], "big"),
+    ("pequeño", "es", "pequeño", "adjetivo", "singular", ["chico"], ["grande"], "small"),
+]
 
 class Trainer:
     def __init__(self, memory: LexicalMemory, brain: Brain):
@@ -78,6 +96,8 @@ class Trainer:
             self.memory.add(term, category=category, teaching=teaching)
         for source, relation, target in RELATIONS:
             self.memory.add_relation(source, relation, target)
+        for row in LEXICAL:
+            self.memory.add_lexical(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7])
         return len(KNOWLEDGE)
 
     def evaluate(self) -> dict:

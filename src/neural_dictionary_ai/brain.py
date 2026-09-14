@@ -6,6 +6,7 @@ import yaml
 from .code_expert import CodeExpert
 from .memory import LexicalMemory
 from .vectors import cosine, vector_for, tokenize, tokenize_ids, numeric_text
+from .linguistics import analyze_tokens, detect_language, sentence_template, singular_plural
 
 EMOTION_WORDS={"alegria":{"feliz","alegría","gracias","amor","excelente","bien"},"tristeza":{"triste","dolor","pérdida","solo","llorar"},"enojo":{"odio","enojo","rabia","molesto","injusto"},"curiosidad":{"cómo","como","porqué","por","qué","que","aprender","entender"}}
 CODE_MARKERS={"python","código","codigo","programa","función","funcion","error","bug","script","clase","variable"}
@@ -39,7 +40,7 @@ class Brain:
         return [token for token in candidates if token not in known][:2]
 
     def _learn_from_definition(self, text):
-        match=re.search(r"^\s*([\wáéíóúüñ ]{2,40})\s+(?:significa|es)\s+(.{4,})[.!]?\s*$", text, re.IGNORECASE)
+        match=re.search(r"^\s*([\wáéíóúüñ ]{2,40})\s+(?:significa|means|is)\s+(.{4,})[.!]?\s*$", text, re.IGNORECASE)
         if not match:return None
         term=match.group(1).strip().casefold(); meaning=match.group(2).strip()
         if " " in term: term=term.split()[-1]
@@ -48,11 +49,14 @@ class Brain:
 
     def generate(self,text,emotion,memories,confidence):
         tokens=set(tokenize(text))
-        greetings={"hola","buenas","saludos","hey","buenos"}
+        language,_=detect_language(text)
+        greetings={"hola","buenas","saludos","hey","buenos","hello","hi","olá"}
         if tokens & greetings:
-            if {"cómo","como","estás","estas"} & tokens:
-                return "Hola. Estoy aquí y listo para conversar contigo. No siento como una persona, pero puedo analizar tu mensaje, recordar el contexto de esta sesión y responder de forma coherente. ¿Cómo te encuentras tú?"
-            return "Hola. Me alegra conversar contigo. ¿Qué te gustaría aprender o construir hoy?"
+            if {"cómo","como","estás","estas","how"} & tokens:
+                return sentence_template("greeting",language)
+            if language == "en": return "Hello. It is good to talk with you. What would you like to learn or build today?"
+            if language == "pt": return "Olá. É bom conversar com você. O que você gostaria de aprender ou construir hoje?"
+            return sentence_template("greeting",language) if language in {"es","pt"} else "Hola. ¿En qué puedo ayudarte hoy?"
         if tokens & {"adiós","adios","chao","gracias"}:
             return "Ha sido un gusto conversar contigo. Cuando quieras, podemos continuar aprendiendo."
         if tokens & {"claridad","precisión","precision","respeto"}:
@@ -69,10 +73,16 @@ class Brain:
         if confidence<self.min_confidence or not candidates:
             return "No quiero inventar una respuesta. Necesito una definición, un ejemplo o más contexto para responder con rigor."
         terms=", ".join(r["term"] for r in candidates[:3]); teachings=[r["teaching"] for r in candidates if r["teaching"]]
+        lexical=[]
+        for token in tokenize(text):
+            for row in self.memory.lexical_for(token,language):
+                syn=json.loads(row["synonyms"]); ant=json.loads(row["antonyms"])
+                lexical.append(f"{row['term']} es {row['part_of_speech']} ({row['grammatical_number']}); sinónimos: {', '.join(syn) or 'ninguno'}; antónimos: {', '.join(ant) or 'ninguno'}; traducción: {row['translation'] or 'no registrada'}")
         relations=self.memory.relations_for([r["term"] for r in candidates[:3]])
         relation_text=f" Relación detectada: {relations[0]['source']} {relations[0]['relation']} {relations[0]['target']}." if relations else ""
         tone={"alegria":"Me alegra ayudarte.","tristeza":"Entiendo que puede ser difícil hablar de esto.","enojo":"Veo una señal de molestia; responderé con calma.","curiosidad":"Es una buena pregunta.","neutralidad":"Gracias por explicarlo."}[emotion]
-        return f"{tone} Relaciono tu mensaje con {terms}.{relation_text} {teachings[0] if teachings else 'Puedo seguir aprendiendo con ejemplos.'}"
+        grammar=f" Forma: {lexical[0]}." if lexical else ""
+        return f"{tone} Relaciono tu mensaje con {terms}.{relation_text}{grammar} {teachings[0] if teachings else 'Puedo seguir aprendiendo con ejemplos.'}"
 
     def process(self,text):
         text=text.strip()
@@ -91,4 +101,5 @@ class Brain:
         self.history.append({"user":text,"assistant":response})
         self.history=self.history[-12:]
         self.memory.record_interaction(text,response,emotion,confidence)
-        return {"input":text,"response":response,"emotion":emotion,"emotion_confidence":round(emotion_conf,3),"knowledge_confidence":round(confidence,3),"turn":len(self.history),"tokens":tokenize(text),"token_ids":tokenize_ids(text),"numeric_spelling":numeric_text(text),"user_vector":[round(x,5) for x in vector_for(text,self.dimensions)],"memories":[{"term":r["term"],"score":round(s,4),"meaning":r["teaching"]} for s,r in memories]}
+        language,language_conf=detect_language(text)
+        return {"input":text,"response":response,"language":language,"language_confidence":language_conf,"emotion":emotion,"emotion_confidence":round(emotion_conf,3),"knowledge_confidence":round(confidence,3),"turn":len(self.history),"tokens":tokenize(text),"token_paths":analyze_tokens(text),"token_ids":tokenize_ids(text),"numeric_spelling":numeric_text(text),"morphology":[singular_plural(t) for t in tokenize(text) if t.isalpha()],"user_vector":[round(x,5) for x in vector_for(text,self.dimensions)],"memories":[{"term":r["term"],"score":round(s,4),"meaning":r["teaching"]} for s,r in memories]}
