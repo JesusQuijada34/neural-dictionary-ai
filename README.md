@@ -120,3 +120,32 @@ ia> Gracias por enseñarme que «zumbalú» significa «una idea inventada para 
 ```
 
 Las expresiones comunes como `hola`, `gracias`, `adiós` y `cómo estás` se tratan como lenguaje conversacional básico, no como términos desconocidos que deban definirse. Este aprendizaje es explícito y verificable: no inventa el significado y solo lo incorpora después de recibir una explicación.
+
+## Léxico multilingüe y rutas semánticas
+
+El entrenador incorpora formas en español, inglés y portugués. Cada forma puede registrar idioma, lema, categoría gramatical, número, sinónimos, antónimos y traducción. Por ejemplo, `choza` se conecta con `casa`, `rancho` y `cabaña`, mientras que `y` se clasifica como un conector de adición o anexo entre palabras.
+
+La salida de una consulta incluye `language`, `token_paths`, `morphology` y los datos léxicos disponibles. Las plantillas reconocen saludos y respuestas en varios idiomas, aunque el soporte actual es lingüístico y estructurado, no una traducción general perfecta.
+
+## Agente, triggers y decisiones
+
+El proyecto incluye un agente local con acciones declarativas. `organiza mi escritorio` activa un plan de organización por extensiones, pero el modo de planificación no mueve nada. El comando `organize --apply` es la única ruta que aplica movimientos, nunca borra archivos, no sale de la carpeta raíz indicada y conserva conflictos sin sobrescribir.
+
+```bash
+# Solo plan; no modifica archivos
+PYTHONPATH=src python -m neural_dictionary_ai.cli organize /ruta/al/escritorio
+
+# Aplicar movimientos explícitamente; no elimina ni sobrescribe conflictos
+PYTHONPATH=src python -m neural_dictionary_ai.cli organize /ruta/al/escritorio --apply
+
+# Detectar un trigger sin ejecutar acciones
+PYTHONPATH=src python -m neural_dictionary_ai.cli agent organiza mi escritorio --root /ruta/al/escritorio
+
+# Comparar alternativas con criterios explícitos
+PYTHONPATH=src python -m neural_dictionary_ai.cli debate \
+  "cómo organizar archivos" \
+  "borrar todo rápido" \
+  "crear un plan seguro y reversible"
+```
+
+El agente también puede crear planes de decisión explicables. No tiene autonomía ilimitada: una acción destructiva, una ruta ambigua o una operación fuera de la raíz permitida se rechaza o queda como propuesta. Las pruebas adversariales cubren conflictos, borrado, triggers, planes sin movimiento y conversaciones contradictorias.
