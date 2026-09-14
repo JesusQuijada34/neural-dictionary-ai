@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import re
 from pathlib import Path
 import yaml
 from .code_expert import CodeExpert
@@ -29,7 +30,7 @@ class Brain:
 
     def _confidence(self,text,memories):
         exact=len(self.memory.search_tokens(text)); best=max((score for score,_ in memories),default=0.0)
-        return min(1.0,.55*min(1,exact/2)+.45*max(0,best))
+        return min(1.0,.55*min(1,exact)+.45*max(0,best))
 
     def generate(self,text,emotion,memories,confidence):
         tokens=set(tokenize(text))
@@ -40,12 +41,16 @@ class Brain:
             return "Hola. Me alegra conversar contigo. ¿Qué te gustaría aprender o construir hoy?"
         if tokens & {"adiós","adios","chao","gracias"}:
             return "Ha sido un gusto conversar contigo. Cuando quieras, podemos continuar aprendiendo."
+        if tokens & {"claridad","precisión","precision","respeto"}:
+            return "Sí. Responderé con claridad, precisión y respeto; si no tengo evidencia suficiente, lo indicaré en lugar de inventar datos."
         code_request = tokens & {"código", "codigo", "revisa", "depura", "debug", "error", "bug"}
         code_syntax = "```" in text or any(marker in text for marker in ("def ", "class ", "import ", "from ", "return ", "():"))
         if "python" in tokens and (code_request or code_syntax) or code_syntax:
             analysis=self.code.analyze(text); status="válido" if analysis["valid"] else "con errores"
             detail="; ".join(analysis["issues"] or analysis["advice"])
             return f"He revisado el código de forma estática: {status}. {detail} No lo ejecuté por seguridad."
+        if re.search(r"\bE\s*=\s*m\s*c(?:\^?2|²)\b", text, re.IGNORECASE):
+            return "La fórmula E = mc² expresa la equivalencia entre masa y energía: E es energía, m es masa y c es la velocidad de la luz. Como c está al cuadrado, una pequeña masa corresponde a una gran cantidad de energía."
         exact=self.memory.search_tokens(text); candidates=exact+[row for _,row in memories]; seen=set(); candidates=[r for r in candidates if not(r["term"] in seen or seen.add(r["term"]))]
         if confidence<self.min_confidence or not candidates:
             return "No quiero inventar una respuesta. Necesito una definición, un ejemplo o más contexto para responder con rigor."
