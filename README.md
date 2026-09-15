@@ -149,3 +149,7 @@ PYTHONPATH=src python -m neural_dictionary_ai.cli debate \
 ```
 
 El agente también puede crear planes de decisión explicables. No tiene autonomía ilimitada: una acción destructiva, una ruta ambigua o una operación fuera de la raíz permitida se rechaza o queda como propuesta. Las pruebas adversariales cubren conflictos, borrado, triggers, planes sin movimiento y conversaciones contradictorias.
+
+## Contexto médico prudente
+
+El corpus incluye conceptos sobre oído, dolor punzante, oído externo y medio, cerumen, tímpano, infección, supuración, fiebre, vértigo, mareo, pérdida de audición, trauma, cuerpo extraño, diabetes, urgencias, otorrinolaringología, contraindicaciones y autocuidado. Ante una entrada que combina dolor y oído, el cerebro produce una orientación general con señales de alarma y evita diagnosticar o indicar gotas y medicamentos de forma personalizada. Este módulo es educativo y no sustituye atención médica.

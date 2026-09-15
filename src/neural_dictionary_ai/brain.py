@@ -61,6 +61,10 @@ class Brain:
             return "Ha sido un gusto conversar contigo. Cuando quieras, podemos continuar aprendiendo."
         if tokens & {"claridad","precisión","precision","respeto"}:
             return "Sí. Responderé con claridad, precisión y respeto; si no tengo evidencia suficiente, lo indicaré en lugar de inventar datos."
+        if ("oído" in tokens or "oido" in tokens) and ("dolor" in tokens or "punzante" in tokens):
+            return ("No soy médico y esta información no sustituye una valoración profesional. El dolor punzante de oído puede tener causas diversas, como problemas del oído externo o medio, cerumen, la trompa de Eustaquio, mandíbula, dientes o neuralgia. "
+                    "Busca atención urgente si hay dolor muy intenso o que empeora, fiebre alta, pus o sangre, hinchazón detrás de la oreja, pérdida súbita de audición, vértigo intenso, vómitos, debilidad facial, confusión, cuello rígido, trauma o un cuerpo extraño; también si tienes diabetes o defensas bajas. "
+                    "Mientras te valoran, no introduzcas hisopos, pinzas, aceites, ajo, agua oxigenada ni gotas sin indicación, mantén el oído seco y puedes usar una compresa tibia externa. Los analgésicos tienen contraindicaciones: consulta a un profesional o farmacéutico antes de tomarlos. Si no es severo pero persiste, solicita valoración médica u otorrinolaringológica en las próximas 24–48 horas.")
         code_request = tokens & {"código", "codigo", "revisa", "depura", "debug", "error", "bug"}
         code_syntax = "```" in text or any(marker in text for marker in ("def ", "class ", "import ", "from ", "return ", "():"))
         if "python" in tokens and (code_request or code_syntax) or code_syntax:
@@ -102,4 +106,4 @@ class Brain:
         self.history=self.history[-12:]
         self.memory.record_interaction(text,response,emotion,confidence)
         language,language_conf=detect_language(text)
-        return {"input":text,"response":response,"language":language,"language_confidence":language_conf,"emotion":emotion,"emotion_confidence":round(emotion_conf,3),"knowledge_confidence":round(confidence,3),"turn":len(self.history),"tokens":tokenize(text),"token_paths":analyze_tokens(text),"token_ids":tokenize_ids(text),"numeric_spelling":numeric_text(text),"morphology":[singular_plural(t) for t in tokenize(text) if t.isalpha()],"user_vector":[round(x,5) for x in vector_for(text,self.dimensions)],"memories":[{"term":r["term"],"score":round(s,4),"meaning":r["teaching"]} for s,r in memories]}
+        return {"input":text,"response":response,"language":language,"language_confidence":language_conf,"emotion":emotion,"emotion_confidence":round(emotion_conf,3),"knowledge_confidence":round(confidence,3),"turn":len(self.history),"tokens":tokenize(text),"token_paths":analyze_tokens(text),"token_ids":tokenize_ids(text),"numeric_spelling":numeric_text(text),"morphology":[singular_plural(t) for t in tokenize(text) if t.isalpha() and t.casefold() not in STOPWORDS],"user_vector":[round(x,5) for x in vector_for(text,self.dimensions)],"memories":[{"term":r["term"],"score":round(s,4),"meaning":r["teaching"]} for s,r in memories]}

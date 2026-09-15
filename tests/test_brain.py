@@ -93,3 +93,13 @@ def test_multilingual_semantic_paths_and_grammar(tmp_path):
     assert english["language"] == "en"
     assert "Hello" in english["response"]
     memory.close()
+
+def test_medical_context_is_cautious_and_actionable(tmp_path):
+    memory = LexicalMemory(tmp_path / "medical.sqlite3")
+    brain = Brain(memory, ROOT / "neurons" / "default.yml")
+    Trainer(memory, brain).teach_once()
+    result = brain.process("Tengo dolor punzante en el oído derecho")
+    assert "No soy médico" in result["response"]
+    assert "pérdida súbita de audición" in result["response"]
+    assert "no introduzcas" in result["response"]
+    memory.close()

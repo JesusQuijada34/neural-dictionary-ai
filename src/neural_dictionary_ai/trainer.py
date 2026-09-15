@@ -53,6 +53,19 @@ KNOWLEDGE += [
     ("explicación", "comunicación", "Descripción que relaciona hechos y razones para facilitar comprensión."), ("traducción", "lenguaje", "Transformación de un mensaje a otra lengua conservando su intención."),
     ("idioma", "lenguaje", "Lengua usada por una comunidad para comunicarse."), ("región", "geografía", "Área delimitada por características físicas, culturales o políticas."),
 ]
+KNOWLEDGE += [
+    ("oído", "medicina", "Órgano relacionado con la audición y el equilibrio."), ("dolor de oído", "medicina", "Síntoma de causas diversas que requiere valoración según intensidad y signos asociados."),
+    ("dolor punzante", "medicina", "Descripción de un dolor agudo o parecido a pinchazos; no identifica por sí sola una causa."), ("otorrinolaringólogo", "medicina", "Profesional especialista en oído, nariz y garganta."),
+    ("infección", "medicina", "Invasión o multiplicación de agentes biológicos que puede causar inflamación y síntomas."), ("oído externo", "anatomía", "Parte del oído que incluye el pabellón y el conducto auditivo."),
+    ("oído medio", "anatomía", "Cavidad situada detrás del tímpano que participa en la transmisión del sonido."), ("cerumen", "anatomía", "Sustancia natural del conducto auditivo que ayuda a protegerlo."),
+    ("tímpano", "anatomía", "Membrana que separa el oído externo del oído medio y vibra con el sonido."), ("supuración", "medicina", "Salida de líquido, pus o sangre por una abertura; requiere valoración clínica."),
+    ("fiebre", "medicina", "Elevación de la temperatura corporal que puede acompañar a algunas enfermedades."), ("vértigo", "medicina", "Sensación de giro o movimiento; puede requerir atención urgente si es intenso."),
+    ("mareo", "medicina", "Sensación inespecífica de inestabilidad o aturdimiento."), ("pérdida de audición", "medicina", "Disminución de la capacidad para oír; si es súbita debe valorarse pronto."),
+    ("compresa tibia", "autocuidado", "Aplicación externa de calor moderado que puede aliviar molestias, sin introducir objetos."), ("contraindicación", "medicina", "Circunstancia en la que un tratamiento puede ser inadecuado o riesgoso."),
+    ("paracetamol", "medicamento", "Analgésico cuyo uso depende de dosis, antecedentes y contraindicaciones personales."), ("ibuprofeno", "medicamento", "Antiinflamatorio y analgésico que no es adecuado para todas las personas."),
+    ("diabetes", "medicina", "Condición que puede aumentar el riesgo de complicaciones y modifica la prioridad de consulta."), ("urgencias", "atención médica", "Servicio para situaciones potencialmente graves o que requieren atención inmediata."),
+    ("trauma", "medicina", "Lesión causada por un golpe, accidente o fuerza externa."), ("cuerpo extraño", "medicina", "Objeto alojado en una zona del cuerpo donde no debería estar."),
+]
 RELATIONS = [
     ("palabra", "tiene", "significado"), ("pregunta", "inicia", "conversación"),
     ("usuario", "envía", "pregunta"), ("contexto", "aclara", "significado"),
@@ -60,6 +73,9 @@ RELATIONS = [
     ("entrenamiento", "mejora", "inferencia"), ("vector", "mide", "similitud"),
     ("coseno", "compara", "vector"), ("bucle", "repite", "instrucción"),
     ("prueba", "verifica", "programa"), ("seguridad", "protege", "privacidad"),
+    ("dolor de oído", "puede_requerir", "valoración médica"), ("oído", "contiene", "tímpano"),
+    ("supuración", "es_signo_de_alarma", "consulta médica"), ("pérdida de audición", "requiere", "valoración pronta"),
+    ("trauma", "puede_requerir", "urgencias"), ("diabetes", "aumenta", "prioridad de consulta"),
 ]
 PROBES = [
     "hola cómo estás", "qué significa una palabra", "quiero aprender sobre vectores",
@@ -67,6 +83,7 @@ PROBES = [
     "qué relación hay entre datos e información", "dame una explicación de contexto",
     "qué es la energía", "cómo funciona internet", "qué significa una célula",
     "qué es una probabilidad", "explica causa y efecto",
+    "qué significa dolor de oído", "qué señales de alarma tiene el oído",
 ]
 LEXICAL = [
     ("choza", "es", "choza", "sustantivo", "singular", ["casa", "rancho", "cabaña"], ["palacio"], "hut"),
