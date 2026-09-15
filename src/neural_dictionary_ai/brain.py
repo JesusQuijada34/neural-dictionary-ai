@@ -1,6 +1,7 @@
 from __future__ import annotations
 import json
 import re
+import os
 from pathlib import Path
 import yaml
 from .code_expert import CodeExpert
@@ -8,6 +9,7 @@ from .memory import LexicalMemory
 from .vectors import cosine, vector_for, tokenize, tokenize_ids, numeric_text
 from .linguistics import analyze_tokens, detect_language, sentence_template, singular_plural
 from .reasoning import reason
+from .hf_backend import HFTextBackend
 
 EMOTION_WORDS={"alegria":{"feliz","alegría","gracias","amor","excelente","bien"},"tristeza":{"triste","dolor","pérdida","solo","llorar"},"enojo":{"odio","enojo","rabia","molesto","injusto"},"curiosidad":{"cómo","como","porqué","por","qué","que","aprender","entender"}}
 CODE_MARKERS={"python","código","codigo","programa","función","funcion","error","bug","script","clase","variable"}
@@ -16,7 +18,7 @@ STOPWORDS={"a","al","con","cómo","como","de","del","el","en","es","esta","está
 class Brain:
     def __init__(self,memory:LexicalMemory,neuron_file:str|Path):
         self.memory=memory; self.config=yaml.safe_load(Path(neuron_file).read_text(encoding="utf-8")); cfg=self.config["brain"]
-        self.dimensions=int(cfg.get("dimensions",64)); self.top_k=int(cfg.get("top_k",5)); self.min_confidence=float(cfg.get("min_confidence",0.28)); self.code=CodeExpert()
+        self.dimensions=int(cfg.get("dimensions",64)); self.top_k=int(cfg.get("top_k",5)); self.min_confidence=float(cfg.get("min_confidence",0.28)); self.code=CodeExpert(); self.semantic=HFTextBackend() if os.getenv("NDA_ENABLE_HF","0")=="1" else None
         self.history=[]
 
     def estimate_emotion(self,text):
@@ -29,7 +31,11 @@ class Brain:
             try: dictionary=json.loads(row["vector"])
             except (TypeError,json.JSONDecodeError): dictionary=vector_for(row["term"],self.dimensions)
             ranked.append((cosine(user,dictionary),row))
-        return sorted(ranked,key=lambda x:x[0],reverse=True)[:self.top_k]
+        ranked=sorted(ranked,key=lambda x:x[0],reverse=True)
+        if self.semantic and self.semantic.available:
+            rows=[row for _,row in ranked]; scores=self.semantic.similarity(text,[row["term"] for row in rows])
+            ranked=sorted([(0.45*score+0.55*base,row) for (base,row),score in zip(ranked,scores)],key=lambda x:x[0],reverse=True)
+        return ranked[:self.top_k]
 
     def _confidence(self,text,memories):
         exact=len(self.memory.search_tokens(text)); best=max((score for score,_ in memories),default=0.0)

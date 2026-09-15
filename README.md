@@ -153,3 +153,35 @@ El agente también puede crear planes de decisión explicables. No tiene autonom
 ## Contexto médico prudente
 
 El corpus incluye conceptos sobre oído, dolor punzante, oído externo y medio, cerumen, tímpano, infección, supuración, fiebre, vértigo, mareo, pérdida de audición, trauma, cuerpo extraño, diabetes, urgencias, otorrinolaringología, contraindicaciones y autocuidado. Ante una entrada que combina dolor y oído, el cerebro produce una orientación general con señales de alarma y evita diagnosticar o indicar gotas y medicamentos de forma personalizada. Este módulo es educativo y no sustituye atención médica.
+
+## Hugging Face ligero y vectorización avanzada
+
+El backend opcional `HFTextBackend` usa `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`, cuya ficha declara licencia Apache-2.0 y embeddings multilingües de 384 dimensiones. Los pesos no se suben al repositorio: se descargan de forma explícita, versionable y con caché local para evitar un binario grande y opaco dentro de Git. El vectorizador determinista propio sigue siendo el fallback.
+
+```bash
+pip install -e '.[hf]'
+python scripts/download_model.py
+NDA_ENABLE_HF=1 python -m neural_dictionary_ai.cli --db data/dictionary.sqlite3 chat "¿qué significa choza?"
+```
+
+Hugging Face se usa aquí para similitud semántica y recuperación de contexto, no para copiar personalidades, marcas, estilos de terceros o identidades. El aprendizaje automático del proyecto sigue siendo explícito y auditable: `AutoTrainer` solo registra definiciones o correcciones confirmadas por el usuario; no realiza autoentrenamiento infinito ni incorpora texto desconocido como verdad.
+
+## Skills
+
+Las capacidades están registradas en [skills/registry.yml](/home/ubuntu/neural-dictionary-ai/skills/registry.yml) y pueden consultarse con:
+
+```bash
+PYTHONPATH=src python -m neural_dictionary_ai.cli skills
+```
+
+## App web y Telegram
+
+La app Flask está en [webapp.py](/home/ubuntu/neural-dictionary-ai/webapp.py). Render puede desplegarla con [render.yaml](/home/ubuntu/neural-dictionary-ai/render.yaml) y `requirements-render.txt`. Endpoints:
+
+```text
+GET  /healthz
+POST /chat                 {"text":"hola"}
+POST /telegram/webhook     actualización de Telegram
+```
+
+Variables para Telegram: `TELEGRAM_BOT_TOKEN` y opcionalmente `TELEGRAM_WEBHOOK_SECRET`. El webhook valida el secreto si está configurado y solo responde al mensaje recibido; no ejecuta acciones de escritorio ni operaciones destructivas desde Telegram. Para producción, configura la URL HTTPS del servicio como webhook mediante la API oficial de Telegram y conserva el token únicamente en variables secretas.

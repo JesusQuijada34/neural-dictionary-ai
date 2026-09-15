@@ -1,0 +1,16 @@
+skills:
+  - id: semantic-reasoning
+    trigger: reasoning
+    description: Aritmética segura, silogismos, incertidumbre y trazas explicables.
+  - id: desktop-organizer
+    trigger: organiza mi escritorio
+    description: Planifica clasificación por extensiones sin borrar ni sobrescribir.
+  - id: language-teaching
+    trigger: qué significa
+    description: Pregunta y guarda definiciones explícitas del usuario.
+  - id: medical-safety
+    trigger: dolor de oído
+    description: Orientación educativa con señales de alarma, sin diagnóstico.
+  - id: hf-semantic-embeddings
+    trigger: semantic_similarity
+    description: Embeddings opcionales con modelo HF descargado en caché y licencia documentada.

@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: neural-dictionary-ai
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: gunicorn webapp:app
+    envVars:
+      - key: NDA_SEED_ON_START
+        value: "1"
+      - key: NDA_ENABLE_HF
+        value: "0"
+      - key: NDA_DB
+        value: data/web.sqlite3

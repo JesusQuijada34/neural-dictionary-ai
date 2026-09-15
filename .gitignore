@@ -5,3 +5,5 @@ __pycache__/
 data/*.sqlite3
 data/*.json
 *.pyc
+models/cache/
+data/web.sqlite3

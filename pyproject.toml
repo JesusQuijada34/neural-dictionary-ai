@@ -9,6 +9,11 @@ description = "Local symbolic-vector AI with SQLite memory and YAML neurons"
 requires-python = ">=3.10"
 dependencies = ["PyYAML>=6.0"]
 
+[project.optional-dependencies]
+hf = ["sentence-transformers>=3.0,<6"]
+web = ["Flask>=3.0,<4", "requests>=2.31,<3"]
+all = ["sentence-transformers>=3.0,<6", "Flask>=3.0,<4", "requests>=2.31,<3"]
+
 [project.scripts]
 nda = "neural_dictionary_ai.cli:main"
 
