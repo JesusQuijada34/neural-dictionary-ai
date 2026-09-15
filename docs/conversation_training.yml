@@ -1,0 +1,19 @@
+source: user_conversation_summary
+consent_scope: explicit_project_training_data
+lessons:
+  - intent: build_symbolic_vector_ai
+    lesson: Usar SQLite, vectores reproducibles, YAML neurons y Python sin depender obligatoriamente de modelos binarios.
+  - intent: teach_unknown_words
+    lesson: Preguntar el significado, aceptar una definición explícita y guardarla con fuente de usuario.
+  - intent: multilingual_semantics
+    lesson: Relacionar idioma, lema, singular/plural, sinónimos, antónimos, traducción y conectores.
+  - intent: safe_agent
+    lesson: Planificar triggers y acciones reversibles; no borrar ni sobrescribir sin permiso explícito.
+  - intent: explainable_reasoning
+    lesson: Separar observaciones, reglas, incertidumbre y conclusión mediante reasoning_trace.
+  - intent: identity_policy
+    lesson: Crear un personaje original configurable sin copiar personas, marcas o personajes protegidos.
+  - intent: web_and_telegram
+    lesson: Exponer Flask y Telegram con secretos en variables de entorno y validación de webhook.
+  - intent: medical_context
+    lesson: Responder con orientación prudente, señales de alarma y derivación profesional, sin diagnosticar.

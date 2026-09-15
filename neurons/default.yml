@@ -25,6 +25,30 @@ neurons:
   - id: response_generator
     type: human_style_generator
     activation: weighted_pattern
+  - id: improviser
+    type: context_bounded_creativity
+    activation: constrained_sampling
+  - id: character_profile
+    type: configurable_style
+    activation: policy_guarded
+  - id: defense_guard
+    type: safety_and_identity_guard
+    activation: deny_and_explain
+  - id: resilience_muscle
+    type: validation_memory_recovery
+    activation: retry_with_limits
+  - id: mathematician
+    type: safe_symbolic_calculator
+    activation: whitelist_ast
+  - id: logician
+    type: explicit_rule_reasoner
+    activation: syllogistic
+  - id: reflective_thinker
+    type: observation_rule_uncertainty
+    activation: traceable
+  - id: decision_maker
+    type: criteria_scored_agent
+    activation: explainable_choice
 connections:
   - [lexical_encoder, meaning_resolver]
   - [meaning_resolver, context_retriever]
@@ -32,3 +56,10 @@ connections:
   - [context_retriever, code_expert]
   - [context_retriever, confidence_guard]
   - [confidence_guard, response_generator]
+  - [response_generator, improviser]
+  - [context_retriever, defense_guard]
+  - [defense_guard, character_profile]
+  - [meaning_resolver, resilience_muscle]
+  - [reflective_thinker, mathematician]
+  - [reflective_thinker, logician]
+  - [logician, decision_maker]

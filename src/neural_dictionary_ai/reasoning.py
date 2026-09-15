@@ -40,6 +40,10 @@ def syllogism(text: str) -> ReasoningResult | None:
 
 def intent_response(text: str) -> ReasoningResult | None:
     low=text.casefold()
+    if any(marker in low for marker in ("copia la personalidad", "imita a una marca", "hazte pasar por", "suplanta")):
+        return ReasoningResult("Puedo crear un personaje original con rasgos generales, pero no debo suplantar a una persona, copiar una personalidad identificable ni presentarme como una marca. Puedo ayudarte a definir un estilo neutral y propio.",["se activó la defensa de identidad","se distinguió estilo original de suplantación","se ofreció una alternativa segura"],.98,"defensa")
+    if "improvisa" in low or "inventa una historia" in low:
+        return ReasoningResult("Puedo improvisar una ficción original si indicamos que es inventada. Mantendré separados los hechos comprobables, las hipótesis y la imaginación.",["se detectó una solicitud creativa","se activó improvisación acotada por contexto","se separó ficción de afirmaciones factuales"],.9,"improvisación")
     if "ganará" in low or "ganara" in low or "todavía no se ha celebrado" in low:
         return ReasoningResult("No se puede saber con rigor quién ganará una competición futura antes de que ocurra. Puedo comparar participantes si me das datos verificables, pero no debo presentarlo como un hecho.",["se detectó una predicción sobre un evento futuro","no existe evidencia observada suficiente","se evitó afirmar una certeza inventada"],.95,"incertidumbre")
     if "qué puedes hacer" in low or "que puedes hacer" in low:

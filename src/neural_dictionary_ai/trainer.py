@@ -67,6 +67,18 @@ KNOWLEDGE += [
     ("diabetes", "medicina", "Condición que puede aumentar el riesgo de complicaciones y modifica la prioridad de consulta."), ("urgencias", "atención médica", "Servicio para situaciones potencialmente graves o que requieren atención inmediata."),
     ("trauma", "medicina", "Lesión causada por un golpe, accidente o fuerza externa."), ("cuerpo extraño", "medicina", "Objeto alojado en una zona del cuerpo donde no debería estar."),
 ]
+KNOWLEDGE += [
+    ("improvisación", "cognición", "Generación de una respuesta nueva a partir del contexto disponible, sin afirmar hechos no comprobados."),
+    ("personaje", "interfaz", "Perfil configurable de estilo y objetivos; no es una identidad real ni copia una marca o persona."),
+    ("defensa", "seguridad", "Módulo que detecta riesgos, rechaza acciones dañinas y explica límites."),
+    ("musculatura", "arquitectura", "Metáfora para módulos de resistencia: validación, memoria, recuperación y tolerancia a errores."),
+    ("matemático", "razonamiento", "Módulo que calcula expresiones y verifica operaciones dentro de límites seguros."),
+    ("lógico", "razonamiento", "Módulo que aplica reglas explícitas y silogismos con una traza verificable."),
+    ("pensativo", "razonamiento", "Modo que separa observaciones, reglas, incertidumbre y conclusión antes de responder."),
+    ("decidido", "agente", "Modo que selecciona una opción según criterios declarados, sin convertir una recomendación en certeza."),
+    ("personaje seguro", "interfaz", "Configuración de tono y límites que evita suplantar identidades o copiar personalidades ajenas."),
+    ("datos entrenables", "aprendizaje", "Ejemplos resumidos y consentidos que se incorporan con fuente, categoría y evaluación."),
+]
 RELATIONS = [
     ("palabra", "tiene", "significado"), ("pregunta", "inicia", "conversación"),
     ("usuario", "envía", "pregunta"), ("contexto", "aclara", "significado"),

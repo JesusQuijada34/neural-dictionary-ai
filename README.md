@@ -185,3 +185,13 @@ POST /telegram/webhook     actualización de Telegram
 ```
 
 Variables para Telegram: `TELEGRAM_BOT_TOKEN` y opcionalmente `TELEGRAM_WEBHOOK_SECRET`. El webhook valida el secreto si está configurado y solo responde al mensaje recibido; no ejecuta acciones de escritorio ni operaciones destructivas desde Telegram. Para producción, configura la URL HTTPS del servicio como webhook mediante la API oficial de Telegram y conserva el token únicamente en variables secretas.
+
+## Neuronas cognitivas y datos de esta conversación
+
+La configuración YAML ahora declara 15 neuronas, incluyendo `improviser`, `character_profile`, `defense_guard`, `resilience_muscle`, `mathematician`, `logician`, `reflective_thinker` y `decision_maker`. La “musculatura” es una metáfora de validación, memoria, recuperación y tolerancia limitada a errores; no representa un cuerpo físico.
+
+El personaje está definido en [neurons/persona.yml](/home/ubuntu/neural-dictionary-ai/neurons/persona.yml) como un perfil original y configurable. Puede tener tono y rasgos generales, pero no copia una persona, una marca, un personaje protegido ni una voz identificable. La improvisación solo se activa como ficción declarada y separa imaginación de hechos.
+
+Se añadió un resumen estructurado de esta conversación en [conversation_training.yml](/home/ubuntu/neural-dictionary-ai/docs/conversation_training.yml). Contiene lecciones sobre IA simbólico-vectorial, enseñanza de palabras, semántica multilingüe, agentes seguros, razonamiento explicable, identidad, Flask/Telegram y contexto médico. Se conserva como resumen de objetivos y no como copia literal de una identidad.
+
+La defensa devuelve una explicación cuando se solicita suplantar una identidad. El razonamiento continúa exponiendo una traza breve de reglas aplicadas, sin afirmar que el sistema tenga pensamientos privados, consciencia o sentimientos reales.

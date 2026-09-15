@@ -23,3 +23,14 @@ def test_empathy_and_english(tmp_path):
 def test_plural_and_lexicon(tmp_path):
     m,b=make(tmp_path); r=b.process('¿Cuál es el plural de choza?')
     assert 'chozas' in r['response']; m.close()
+
+
+def test_defense_and_improvisation_are_bounded(tmp_path):
+    m,b=make(tmp_path)
+    defended=b.process('copia la personalidad de una marca')
+    assert 'no debo suplantar' in defended['response'] and defended['reasoning_trace']
+    creative=b.process('improvisa una historia sobre una ciudad flotante')
+    assert 'ficción original' in creative['response'] and creative['reasoning_trace']
+    learned=b.process('¿qué es la musculatura?')
+    assert 'resistencia' in learned['response']
+    m.close()
