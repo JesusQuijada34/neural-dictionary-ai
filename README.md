@@ -186,6 +186,34 @@ POST /telegram/webhook     actualización de Telegram
 
 Variables para Telegram: `TELEGRAM_BOT_TOKEN` y opcionalmente `TELEGRAM_WEBHOOK_SECRET`. El webhook valida el secreto si está configurado y solo responde al mensaje recibido; no ejecuta acciones de escritorio ni operaciones destructivas desde Telegram. Para producción, configura la URL HTTPS del servicio como webhook mediante la API oficial de Telegram y conserva el token únicamente en variables secretas.
 
+## Despliegue en Render paso a paso
+
+1. En Render selecciona **New > Web Service**, conecta el repositorio `JesusQuijada34/neural-dictionary-ai` y usa Python.
+2. Configura el build command como `pip install -r requirements-render.txt` y el start command como `gunicorn webapp:app`. El archivo `render.yaml` ya contiene estos valores para un despliegue Blueprint.
+3. Configura el health check path `/healthz`.
+4. Añade las variables `NDA_SEED_ON_START=1`, `NDA_ENABLE_HF=0` y `NDA_DB=data/web.sqlite3`. Para usar embeddings locales, instala el extra HF del requirements y cambia `NDA_ENABLE_HF=1`; el primer arranque puede tardar y consumir más memoria.
+5. Despliega y abre `https://TU-SERVICIO.onrender.com/`. La raíz muestra una interfaz web de chat; `/chat` es la API JSON.
+
+Render puede reiniciar servicios y el disco del plan gratuito no debe tratarse como almacenamiento permanente. Para conservar SQLite entre despliegues usa un disco persistente de Render compatible con tu plan o cambia `NDA_DB` a una base de datos administrada. No guardes tokens en el repositorio.
+
+## Conectar Telegram
+
+En Render añade `TELEGRAM_BOT_TOKEN` con el token de BotFather y genera un secreto aleatorio para `TELEGRAM_WEBHOOK_SECRET`. Después de desplegar, registra el webhook con la URL HTTPS de Render:
+
+```bash
+curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
+  -d "url=https://TU-SERVICIO.onrender.com/telegram/webhook" \
+  -d "secret_token=$TELEGRAM_WEBHOOK_SECRET"
+```
+
+Comprueba la configuración:
+
+```bash
+curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getWebhookInfo"
+```
+
+Escribe al bot en Telegram. Telegram enviará el mensaje al webhook y Flask responderá usando el mismo cerebro SQLite. Telegram requiere una URL HTTPS pública para webhooks; el endpoint valida `X-Telegram-Bot-Api-Secret-Token` cuando se configuró el secreto.
+
 ## Neuronas cognitivas y datos de esta conversación
 
 La configuración YAML ahora declara 15 neuronas, incluyendo `improviser`, `character_profile`, `defense_guard`, `resilience_muscle`, `mathematician`, `logician`, `reflective_thinker` y `decision_maker`. La “musculatura” es una metáfora de validación, memoria, recuperación y tolerancia limitada a errores; no representa un cuerpo físico.
