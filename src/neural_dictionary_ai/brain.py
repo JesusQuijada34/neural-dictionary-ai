@@ -7,6 +7,7 @@ from .code_expert import CodeExpert
 from .memory import LexicalMemory
 from .vectors import cosine, vector_for, tokenize, tokenize_ids, numeric_text
 from .linguistics import analyze_tokens, detect_language, sentence_template, singular_plural
+from .reasoning import reason
 
 EMOTION_WORDS={"alegria":{"feliz","alegría","gracias","amor","excelente","bien"},"tristeza":{"triste","dolor","pérdida","solo","llorar"},"enojo":{"odio","enojo","rabia","molesto","injusto"},"curiosidad":{"cómo","como","porqué","por","qué","que","aprender","entender"}}
 CODE_MARKERS={"python","código","codigo","programa","función","funcion","error","bug","script","clase","variable"}
@@ -92,18 +93,21 @@ class Brain:
         text=text.strip()
         if not text:
             return {"input":"","response":"Estoy escuchando. Escribe una pregunta, idea o ejemplo.","emotion":"neutralidad","emotion_confidence":1.0,"knowledge_confidence":0.0,"numeric_spelling":[],"user_vector":[],"memories":[]}
-        learned=self._learn_from_definition(text)
+        learned=self._learn_from_definition(text); reasoning_trace=[]
         if learned:
             term,meaning=learned; response=f"Gracias por enseñarme que «{term}» significa «{meaning}». Lo guardaré en mi memoria para relacionarlo con futuras conversaciones. ¿Qué otra palabra o concepto te gustaría enseñarme?"; emotion,emotion_conf="curiosidad",.8; memories=[]; confidence=1.0
         else:
             emotion,emotion_conf=self.estimate_emotion(text); memories=self.retrieve(text); confidence=self._confidence(text,memories)
-            unknown=self._unknown_terms(text)
-            response=self.generate(text,emotion,memories,confidence)
-            protected = "```" in text or any(marker in text for marker in ("def ", "class ", "import ", "from ", "return ", "E =", "E="))
-            if unknown and confidence < self.min_confidence and not protected:
-                response=f"Quiero entenderte mejor. ¿Qué significa «{unknown[0]}»? Puedes responder, por ejemplo: «{unknown[0]} significa ...»."
+            inference=reason(text)
+            if inference:
+                response=inference.answer; confidence=inference.confidence; reasoning_trace=inference.trace
+            else:
+                unknown=self._unknown_terms(text); response=self.generate(text,emotion,memories,confidence)
+                protected = "```" in text or any(marker in text for marker in ("def ", "class ", "import ", "from ", "return ", "E =", "E="))
+                if unknown and confidence < self.min_confidence and not protected:
+                    response=f"Quiero entenderte mejor. ¿Qué significa «{unknown[0]}»? Puedes responder, por ejemplo: «{unknown[0]} significa ...»."
         self.history.append({"user":text,"assistant":response})
         self.history=self.history[-12:]
         self.memory.record_interaction(text,response,emotion,confidence)
         language,language_conf=detect_language(text)
-        return {"input":text,"response":response,"language":language,"language_confidence":language_conf,"emotion":emotion,"emotion_confidence":round(emotion_conf,3),"knowledge_confidence":round(confidence,3),"turn":len(self.history),"tokens":tokenize(text),"token_paths":analyze_tokens(text),"token_ids":tokenize_ids(text),"numeric_spelling":numeric_text(text),"morphology":[singular_plural(t) for t in tokenize(text) if t.isalpha() and t.casefold() not in STOPWORDS],"user_vector":[round(x,5) for x in vector_for(text,self.dimensions)],"memories":[{"term":r["term"],"score":round(s,4),"meaning":r["teaching"]} for s,r in memories]}
+        return {"input":text,"response":response,"reasoning_trace":reasoning_trace,"language":language,"language_confidence":language_conf,"emotion":emotion,"emotion_confidence":round(emotion_conf,3),"knowledge_confidence":round(confidence,3),"turn":len(self.history),"tokens":tokenize(text),"token_paths":analyze_tokens(text),"token_ids":tokenize_ids(text),"numeric_spelling":numeric_text(text),"morphology":[singular_plural(t) for t in tokenize(text) if t.isalpha() and t.casefold() not in STOPWORDS],"user_vector":[round(x,5) for x in vector_for(text,self.dimensions)],"memories":[{"term":r["term"],"score":round(s,4),"meaning":r["teaching"]} for s,r in memories]}

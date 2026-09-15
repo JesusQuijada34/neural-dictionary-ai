@@ -29,6 +29,7 @@ KNOWLEDGE = [
     ("similitud", "matemáticas", "Medida de cercanía entre dos representaciones."),
     ("coseno", "matemáticas", "Medida angular usada para comparar vectores."),
     ("matriz", "matemáticas", "Organización rectangular de valores numéricos."),
+    ("algoritmo", "programación", "Procedimiento finito y ordenado para resolver un problema."),
     ("bucle", "programación", "Estructura que repite instrucciones bajo una condición."),
     ("condición", "programación", "Expresión que decide qué camino seguir en un programa."),
     ("clase", "programación", "Definición de datos y comportamientos para crear objetos."),
