@@ -1,14 +1,38 @@
 services:
   - type: web
-    name: neural-dictionary-ai
+    name: neural-dictionary-web
     runtime: python
     plan: free
     buildCommand: pip install -r requirements-render.txt
-    startCommand: gunicorn webapp:app
+    startCommand: gunicorn --workers 1 --timeout 120 webapp:app
+    healthCheckPath: /healthz
     envVars:
+      - key: NDA_SERVICE_ROLE
+        value: web
       - key: NDA_SEED_ON_START
         value: "1"
       - key: NDA_ENABLE_HF
         value: "0"
       - key: NDA_DB
         value: data/web.sqlite3
+
+  - type: web
+    name: neural-dictionary-telegram
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: gunicorn --workers 1 --timeout 120 webapp:app
+    healthCheckPath: /healthz
+    envVars:
+      - key: NDA_SERVICE_ROLE
+        value: telegram
+      - key: NDA_SEED_ON_START
+        value: "1"
+      - key: NDA_ENABLE_HF
+        value: "0"
+      - key: NDA_DB
+        value: data/telegram.sqlite3
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_WEBHOOK_SECRET
+        sync: false

@@ -223,3 +223,28 @@ El personaje está definido en [neurons/persona.yml](/home/ubuntu/neural-diction
 Se añadió un resumen estructurado de esta conversación en [conversation_training.yml](/home/ubuntu/neural-dictionary-ai/docs/conversation_training.yml). Contiene lecciones sobre IA simbólico-vectorial, enseñanza de palabras, semántica multilingüe, agentes seguros, razonamiento explicable, identidad, Flask/Telegram y contexto médico. Se conserva como resumen de objetivos y no como copia literal de una identidad.
 
 La defensa devuelve una explicación cuando se solicita suplantar una identidad. El razonamiento continúa exponiendo una traza breve de reglas aplicadas, sin afirmar que el sistema tenga pensamientos privados, consciencia o sentimientos reales.
+
+## Dos servicios Render: web y Telegram
+
+`render.yaml` define dos servicios independientes que ejecutan la misma aplicación:
+
+- `neural-dictionary-web`: interfaz `/` y API `/chat`.
+- `neural-dictionary-telegram`: webhook `/telegram/webhook`, con `TELEGRAM_BOT_TOKEN` y `TELEGRAM_WEBHOOK_SECRET` propios.
+
+Después del despliegue, configura el webhook usando la URL del segundo servicio, no la del servicio web:
+
+```bash
+curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
+  -d "url=https://NEURAL-DICTIONARY-TELEGRAM.onrender.com/telegram/webhook" \
+  -d "secret_token=$TELEGRAM_WEBHOOK_SECRET"
+```
+
+Comprueba `https://NEURAL-DICTIONARY-TELEGRAM.onrender.com/healthz`: debe mostrar `service: telegram` y `telegram_configured: true`. Si Telegram sigue sin responder, consulta:
+
+```bash
+curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/getWebhookInfo"
+```
+
+y los logs del servicio Telegram en Render. Un error al enviar `sendMessage` ahora devuelve HTTP 502 y queda registrado en los logs en vez de fallar silenciosamente.
+
+El vocabulario social incluye `cómo estás`, `cómo te va`, `me encuentro bien como siempre`, `qué haces` y expresiones hostiles como `vete a la vrg`. Las respuestas no pretenden sentimientos reales, pero sí mantienen una conversación cordial y explican las capacidades del sistema.

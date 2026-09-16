@@ -20,7 +20,7 @@ def index():
 def reply(text): return brain.process(text)
 
 @app.get("/healthz")
-def health(): return jsonify({"ok":True,"service":"neural-dictionary-ai","hf":brain.semantic.status() if brain.semantic else {"enabled":False}})
+def health(): return jsonify({"ok":True,"service":os.getenv("NDA_SERVICE_ROLE","web"),"telegram_configured":bool(os.getenv("TELEGRAM_BOT_TOKEN")),"hf":brain.semantic.status() if brain.semantic else {"enabled":False}})
 
 @app.post("/chat")
 def chat():
@@ -36,7 +36,12 @@ def telegram_webhook():
     if not text or chat_id is None:return jsonify({"ok":True,"ignored":True})
     result=reply(text); token=os.getenv("TELEGRAM_BOT_TOKEN")
     if not token:return jsonify({"ok":True,"response":result,"sent":False})
-    response=requests.post(f"https://api.telegram.org/bot{token}/sendMessage",json={"chat_id":chat_id,"text":result["response"]},timeout=15)
-    response.raise_for_status(); return jsonify({"ok":True,"sent":True})
+    try:
+        response=requests.post(f"https://api.telegram.org/bot{token}/sendMessage",json={"chat_id":chat_id,"text":result["response"]},timeout=15)
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        app.logger.exception("Telegram sendMessage failed")
+        return jsonify({"ok":False,"sent":False,"error":str(exc)}),502
+    return jsonify({"ok":True,"sent":True,"chat_id":chat_id})
 
 if __name__=="__main__": app.run(host="0.0.0.0",port=int(os.getenv("PORT","5000")))

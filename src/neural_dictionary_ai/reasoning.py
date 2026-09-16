@@ -40,6 +40,23 @@ def syllogism(text: str) -> ReasoningResult | None:
 
 def intent_response(text: str) -> ReasoningResult | None:
     low=text.casefold()
+    normalized=low.strip("¿?!¡., ")
+    if normalized in {"cómo estás", "como estas", "cómo te va", "como te va"}:
+        return ReasoningResult("Estoy funcionando y listo para conversar contigo. No tengo sentimientos humanos, pero puedo responder con atención y ayudarte. ¿Cómo te encuentras tú?",["se detectó una pregunta social","se respondió de forma cordial","se aclaró el límite sobre sentimientos reales"],.98,"conversación")
+    if any(phrase in low for phrase in ("me encuentro bien", "me siento bien", "estoy bien")):
+        return ReasoningResult("Me alegra saber que te encuentras bien. Gracias por contármelo. Yo estoy disponible para conversar, aprender contigo y ayudarte con preguntas, ideas o código.",["se detectó una afirmación de bienestar","se seleccionó una respuesta social de reconocimiento","se explicó la función del sistema sin fingir sentimientos"],.98,"conversación")
+    if any(phrase in low for phrase in ("qué haces", "que haces", "qué estás haciendo", "que estas haciendo")):
+        return ReasoningResult("Estoy procesando tu mensaje, consultando mi diccionario y aplicando reglas de conversación. También puedo explicarte conceptos, calcular operaciones, revisar código sin ejecutarlo y aprender definiciones que me enseñes.",["se detectó una pregunta sobre actividad actual","se describieron procesos disponibles","se evitó afirmar acciones ocultas o consciencia"],.98,"conversación")
+    if any(phrase in low for phrase in ("vete a la vrg", "vete a la verga", "vete al carajo")):
+        return ReasoningResult("Entiendo que estás molesto. No voy a responder con insultos. Si quieres, dime qué falló —por ejemplo, el webhook de Telegram o una respuesta concreta— y lo revisamos paso a paso.",["se detectó lenguaje hostil","se activó desescalada","se ofreció una ruta concreta para diagnosticar el problema"],.98,"desescalada")
+    if any(phrase in low for phrase in ("me encuentro bien", "me siento bien", "estoy bien")):
+        return ReasoningResult("Me alegra saber que te encuentras bien. Gracias por contármelo. Yo estoy disponible para conversar, aprender contigo y ayudarte con preguntas, ideas o código.",["se detectó una afirmación de bienestar","se seleccionó una respuesta social de reconocimiento","se explicó la función del sistema sin fingir sentimientos"],.98,"conversación")
+    if any(phrase in low for phrase in ("qué haces", "que haces", "qué estás haciendo", "que estas haciendo")):
+        return ReasoningResult("Estoy procesando tu mensaje, consultando mi diccionario y aplicando reglas de conversación. También puedo explicarte conceptos, calcular operaciones, revisar código sin ejecutarlo y aprender definiciones que me enseñes.",["se detectó una pregunta sobre actividad actual","se describieron procesos disponibles","se evitó afirmar acciones ocultas o consciencia"],.98,"conversación")
+    if low.strip().strip("¿?!¡., ") in {"cómo estás", "como estas", "cómo te va", "como te va"}:
+        return ReasoningResult("Estoy funcionando y listo para conversar contigo. No tengo sentimientos humanos, pero puedo responder con atención y ayudarte. ¿Cómo te encuentras tú?",["se detectó una pregunta social","se respondió de forma cordial","se aclaró el límite sobre sentimientos reales"],.98,"conversación")
+    if any(phrase in low for phrase in ("vete a la vrg", "vete a la verga", "vete al carajo")):
+        return ReasoningResult("Entiendo que estás molesto. No voy a responder con insultos. Si quieres, dime qué falló —por ejemplo, el webhook de Telegram o una respuesta concreta— y lo revisamos paso a paso.",["se detectó lenguaje hostil","se activó desescalada","se ofreció una ruta concreta para diagnosticar el problema"],.98,"desescalada")
     if any(marker in low for marker in ("copia la personalidad", "imita a una marca", "hazte pasar por", "suplanta")):
         return ReasoningResult("Puedo crear un personaje original con rasgos generales, pero no debo suplantar a una persona, copiar una personalidad identificable ni presentarme como una marca. Puedo ayudarte a definir un estilo neutral y propio.",["se activó la defensa de identidad","se distinguió estilo original de suplantación","se ofreció una alternativa segura"],.98,"defensa")
     if "improvisa" in low or "inventa una historia" in low:
